@@ -35,7 +35,7 @@ export async function capture(req, res) {
 async function doCaptureWork(req, res) {
     latest.date = new Date();
     const queryParams = getQueryParameters(req);
-    const url = queryParams.url;
+    const url = req.header('capture-url') || queryParams.url;
     latest.url = url;
     console.info('Capturing URL: ' + url + ' ...');
     if (queryParams.plainPuppeteer === 'true') {
