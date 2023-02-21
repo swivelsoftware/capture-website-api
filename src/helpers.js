@@ -34,10 +34,10 @@ export async function capture(req, res) {
 
 async function doCaptureWork(req, res) {
     latest.date = new Date();
-    const queryParams = getQueryParameters(req);
-    const url = req.header('capture-url') || queryParams.url;
+    const { url, base64, ...queryParams}  = req.method === 'POST' ? req.body : getQueryParameters(req);
+    console.log(`URL: ${url}`)
+    console.info(`param: ${JSON.stringify(queryParams)}`)
     latest.url = url;
-    console.info('Capturing URL: ' + url + ' ...');
     if (queryParams.plainPuppeteer === 'true') {
         await tryWithPuppeteer(url, queryParams, res);
     } else {
@@ -46,6 +46,9 @@ async function doCaptureWork(req, res) {
             console.info(`Successfully captured URL: ${url}`);
             latest.capture = buffer;
             const responseType = getResponseType(queryParams);
+            if (base64) {
+              return res.send(buffer.toString('base64'))
+            }
             res.type(responseType).send(buffer);
         } catch (e) {
             console.error(e);
